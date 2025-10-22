@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
-import 'detail_produk.dart'; // import halaman detail produk
+import 'detail_produk.dart'; // default detail produk
+import 'detail_kaos.dart';
+import 'detail_hoodie.dart';
+import 'kaos_data.dart';
+import 'hoodie_data.dart';
 
 class ProductPage extends StatelessWidget {
   final String category;
@@ -13,29 +17,31 @@ class ProductPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Contoh produk dengan gambar asset (pastikan sudah ada di pubspec.yaml)
-    final List<Map<String, dynamic>> products = [
-      {
-        "name": "$category 1",
-        "price": 100000,
-        "image": "assets/images/product1.png"
-      },
-      {
-        "name": "$category 2",
-        "price": 120000,
-        "image": "assets/images/product2.png"
-      },
-      {
-        "name": "$category 3",
-        "price": 150000,
-        "image": "assets/images/product3.png"
-      },
-      {
-        "name": "$category 4",
-        "price": 180000,
-        "image": "assets/images/product4.png"
-      },
-    ];
+    // Ambil produk sesuai kategori
+    List<Map<String, dynamic>> products;
+    if (category.toLowerCase() == 'kaos') {
+      products = kaosProducts.take(3).toList(); // Ambil 3 produk dari kaos
+    } else if (category.toLowerCase() == 'hoodie') {
+      products = hoodieProducts.take(3).toList(); // Ambil 3 produk dari hoodie
+    } else {
+      products = [
+        {
+          "name": "$category 1",
+          "price": 100000,
+          "image": "assets/images/product1.png"
+        },
+        {
+          "name": "$category 2",
+          "price": 120000,
+          "image": "assets/images/product2.png"
+        },
+        {
+          "name": "$category 3",
+          "price": 150000,
+          "image": "assets/images/product3.png"
+        },
+      ];
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -115,13 +121,19 @@ class ProductPage extends StatelessWidget {
                     size: 30, // panah lebih besar
                   ),
                   onTap: () {
-                    // Navigasi ke halaman detail produk
+                    // Navigasi ke halaman detail produk sesuai kategori
+                    Widget detailPage;
+                    if (category.toLowerCase() == 'kaos') {
+                      detailPage = DetailKaos(product: product);
+                    } else if (category.toLowerCase() == 'hoodie') {
+                      detailPage = DetailHoodie(product: product);
+                    } else {
+                      detailPage = DetailProduk(product: product);
+                    }
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => DetailProduk(
-                          product: product,
-                        ),
+                        builder: (_) => detailPage,
                       ),
                     );
                   },

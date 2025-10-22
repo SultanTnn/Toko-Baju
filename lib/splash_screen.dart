@@ -1,16 +1,17 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart'; // <--- TAMBAHKAN INI
 import 'login.dart';
+import 'DashboardPage.dart'; // <--- Pastikan Anda punya file DashboardPage.dart
+import 'model/model.dart'; // <--- Untuk menggunakan UserModel
 
 class SplashScreen extends StatefulWidget {
-  const SplashScreen({super.key});
-
-  @override
-  SplashScreenState createState() => SplashScreenState();
+// ... (Kode lainnya)
 }
 
 class SplashScreenState extends State<SplashScreen>
     with SingleTickerProviderStateMixin {
+  // ... (Variabel dan Controller Animasi)
   late AnimationController _controller;
   late Animation<Offset> _offsetAnimation;
 
@@ -18,25 +19,49 @@ class SplashScreenState extends State<SplashScreen>
   void initState() {
     super.initState();
 
-    // Controller untuk animasi naik-turun
+    // ... (Controller dan Animation)
     _controller = AnimationController(
       duration: const Duration(seconds: 2),
       vsync: this,
     )..repeat(reverse: true);
 
     _offsetAnimation = Tween<Offset>(
-      begin: const Offset(0, -0.1), // posisi agak ke atas
-      end: const Offset(0, 0.1), // posisi agak ke bawah
+      begin: const Offset(0, -0.1),
+      end: const Offset(0, 0.1),
     ).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
     );
 
-    // Timer ke LoginPage
-    Timer(const Duration(seconds: 4), () {
+    // GANTI TIMER LAMA DENGAN FUNGSI BARU UNTUK CEK LOGIN
+    _checkLoginStatus();
+  }
+
+  // FUNGSI BARU: Cek status login
+  void _checkLoginStatus() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    // Ambil data email dan nama yang disimpan saat registrasi
+    final String? email = prefs.getString('user_email');
+    final String? username = prefs.getString('user_name');
+
+    // Tunda selama 4 detik (agar Splash Screen tetap tampil)
+    await Future.delayed(const Duration(seconds: 4));
+
+    if (email != null && username != null && mounted) {
+      // Jika data ada (sudah login/register), arahkan ke Dashboard
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (_) => DashboardPage(
+            user: UserModel(username: username, email: email),
+          ),
+        ),
+      );
+    } else if (mounted) {
+      // Jika data tidak ada (belum login), arahkan ke LoginPage
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (_) => const LoginPage()),
       );
-    });
+    }
   }
 
   @override
@@ -45,6 +70,7 @@ class SplashScreenState extends State<SplashScreen>
     super.dispose();
   }
 
+  // ... (Metode build tetap sama)
   @override
   Widget build(BuildContext context) {
     return Scaffold(
