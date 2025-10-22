@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:getwidget/getwidget.dart'; // Import GetWidget
 import 'package:flutter_application_1/register_page.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'DashboardPage.dart'; // Pastikan path ini benar
 import 'model/model.dart'; // Pastikan path ini benar
 
@@ -39,28 +40,67 @@ class _LoginPageState extends State<LoginPage> {
 
   bool _obscureText = true;
 
-  void _login() {
+  void _login() async {
     String email = _emailController.text.trim();
     String password = _passwordController.text.trim();
 
-    if (email.isNotEmpty && password.isNotEmpty) {
-      // Logic login berhasil (untuk demo ini, langsung navigasi)
+    if (email.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Email dan Password wajib diisi")),
+      );
+      return;
+    }
+
+    // Admin credentials (allowed anytime)
+    const String adminEmail = 'admin@admin.com';
+    const String adminPassword = 'admin123';
+
+    if (email == adminEmail && password == adminPassword) {
+      // Login as admin
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('is_logged_in', true);
+      await prefs.setString('current_user_email', adminEmail);
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
           builder: (context) => DashboardPage(
-            user: UserModel(
-              // Asumsi nama pengguna (username) untuk demo
-              username: "Tann",
-              email: email,
-            ),
+            user: UserModel(username: 'Admin', email: adminEmail),
+          ),
+        ),
+      );
+      return;
+    }
+
+    // Normal user: check SharedPreferences (must have registered earlier)
+    final prefs = await SharedPreferences.getInstance();
+    final storedEmail = prefs.getString('user_email');
+    final storedPassword = prefs.getString('user_password');
+    final storedName = prefs.getString('user_name') ?? 'User';
+
+    if (storedEmail == null || storedPassword == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content:
+                Text("Akun belum terdaftar. Silakan daftar terlebih dahulu.")),
+      );
+      return;
+    }
+
+    if (email == storedEmail && password == storedPassword) {
+      await prefs.setBool('is_logged_in', true);
+      await prefs.setString('current_user_email', storedEmail);
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => DashboardPage(
+            user: UserModel(username: storedName, email: storedEmail),
           ),
         ),
       );
     } else {
-      // Tampilkan SnackBar jika ada field kosong
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Email dan Password wajib diisi")),
+        const SnackBar(
+            content: Text("Email atau password salah. Silakan coba lagi.")),
       );
     }
   }
@@ -90,10 +130,10 @@ class _LoginPageState extends State<LoginPage> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(
+                      const Text(
                         "Selamat Datang!",
                         textAlign: TextAlign.center,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 28,
                           fontWeight: FontWeight.bold,
                           color: Color(0xFFE573B4), // Pink lucu

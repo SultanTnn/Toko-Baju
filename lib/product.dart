@@ -88,13 +88,17 @@ class ProductPage extends StatelessWidget {
                       const EdgeInsets.all(16), // padding lebih besar
                   leading: ClipRRect(
                     borderRadius: BorderRadius.circular(12),
-                    child: SizedBox(
-                      width: 90, // gambar lebih besar
-                      height: 90,
+                    child: Container(
+                      width: 110,
+                      height: 110,
+                      color: Colors.white,
                       child: product["image"] != null
-                          ? Image.asset(
-                              product["image"],
-                              fit: BoxFit.cover,
+                          ? Padding(
+                              padding: const EdgeInsets.all(6.0),
+                              child: Image.asset(
+                                product["image"],
+                                fit: BoxFit.contain,
+                              ),
                             )
                           : const Icon(Icons.image,
                               size: 60, color: Colors.grey),
@@ -120,8 +124,8 @@ class ProductPage extends StatelessWidget {
                     color: Colors.pinkAccent,
                     size: 30, // panah lebih besar
                   ),
-                  onTap: () {
-                    // Navigasi ke halaman detail produk sesuai kategori
+                  onTap: () async {
+                    // Navigasi ke halaman detail produk sesuai kategori dan tunggu hasil
                     Widget detailPage;
                     if (category.toLowerCase() == 'kaos') {
                       detailPage = DetailKaos(product: product);
@@ -130,12 +134,13 @@ class ProductPage extends StatelessWidget {
                     } else {
                       detailPage = DetailProduk(product: product);
                     }
-                    Navigator.push(
+                    final result = await Navigator.push(
                       context,
-                      MaterialPageRoute(
-                        builder: (_) => detailPage,
-                      ),
+                      MaterialPageRoute(builder: (_) => detailPage),
                     );
+                    if (result != null && result is Map<String, dynamic>) {
+                      onAddToCart(result);
+                    }
                   },
                 ),
               );

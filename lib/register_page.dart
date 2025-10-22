@@ -41,6 +41,13 @@ class _RegisterPageState extends State<RegisterPage> {
     await prefs.setString('user_email', email);
     await prefs.setString('user_password', password);
 
+    // Simpan daftar email terdaftar (sederhana)
+    final savedEmails = prefs.getStringList('registered_emails') ?? [];
+    if (!savedEmails.contains(email)) {
+      savedEmails.add(email);
+      await prefs.setStringList('registered_emails', savedEmails);
+    }
+
     // ignore: use_build_context_synchronously
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text("Registrasi berhasil! Silakan login.")),

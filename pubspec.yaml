@@ -14,7 +14,7 @@ dependencies:
   # ---------- UI/UX & Formatting (Sesuai diskusi) ----------
   
   # 1. Untuk komponen UI tambahan (GFButton di login.dart)
-  getwidget: ^4.0.0 
+  getwidget: ^7.0.0 
   
   # 2. Untuk memformat harga mata uang (Rp 180.000) di product.dart
   intl: ^0.18.1
@@ -24,6 +24,7 @@ dependencies:
 
   # Tambahan untuk ikon
   cupertino_icons: ^1.0.2
+  url_launcher: ^6.1.10
 
 dev_dependencies:
   flutter_test:

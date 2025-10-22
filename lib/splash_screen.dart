@@ -6,7 +6,10 @@ import 'DashboardPage.dart'; // <--- Pastikan Anda punya file DashboardPage.dart
 import 'model/model.dart'; // <--- Untuk menggunakan UserModel
 
 class SplashScreen extends StatefulWidget {
-// ... (Kode lainnya)
+  const SplashScreen({Key? key}) : super(key: key);
+
+  @override
+  SplashScreenState createState() => SplashScreenState();
 }
 
 class SplashScreenState extends State<SplashScreen>
@@ -40,19 +43,29 @@ class SplashScreenState extends State<SplashScreen>
   void _checkLoginStatus() async {
     final prefs = await SharedPreferences.getInstance();
 
-    // Ambil data email dan nama yang disimpan saat registrasi
-    final String? email = prefs.getString('user_email');
+    // Cek status login persisted
+    final bool isLoggedIn = prefs.getBool('is_logged_in') ?? false;
+    final String? currentEmail = prefs.getString('current_user_email');
     final String? username = prefs.getString('user_name');
 
     // Tunda selama 4 detik (agar Splash Screen tetap tampil)
     await Future.delayed(const Duration(seconds: 4));
 
-    if (email != null && username != null && mounted) {
-      // Jika data ada (sudah login/register), arahkan ke Dashboard
+    if (isLoggedIn && currentEmail != null && mounted) {
+      // Jika user persistent login, masuk ke dashboard
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
           builder: (_) => DashboardPage(
-            user: UserModel(username: username, email: email),
+            user: UserModel(username: username ?? 'User', email: currentEmail),
+          ),
+        ),
+      );
+    } else if (currentEmail != null && username != null && mounted) {
+      // Backward compatible: jika pernah registrasi tapi belum set is_logged_in
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (_) => DashboardPage(
+            user: UserModel(username: username, email: currentEmail),
           ),
         ),
       );

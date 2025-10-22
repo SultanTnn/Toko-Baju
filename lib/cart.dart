@@ -46,17 +46,50 @@ class CartPage extends StatelessWidget {
                   itemCount: cart.length,
                   itemBuilder: (context, index) {
                     final product = cart[index];
-                    return Card(
-                      margin: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 6),
-                      child: ListTile(
-                        leading: const Icon(Icons.shopping_cart,
-                            color: Colors.pinkAccent),
-                        title: Text(product["name"]),
-                        subtitle: Text("Rp ${product["price"]}"),
-                        trailing: IconButton(
-                          icon: const Icon(Icons.delete, color: Colors.red),
-                          onPressed: () => onRemove(index),
+                    return Dismissible(
+                      key: ValueKey(product["name"] + index.toString()),
+                      direction: DismissDirection.endToStart,
+                      background: Container(
+                        alignment: Alignment.centerRight,
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        color: Colors.red,
+                        child: const Icon(Icons.delete, color: Colors.white),
+                      ),
+                      onDismissed: (direction) {
+                        // Inform parent to remove the item
+                        onRemove(index);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('${product["name"]} dihapus')),
+                        );
+                      },
+                      child: Card(
+                        margin: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 6),
+                        child: ListTile(
+                          leading: const Icon(Icons.shopping_cart,
+                              color: Colors.pinkAccent),
+                          title: Text(product["name"]),
+                          subtitle: Text("Rp ${product["price"]}"),
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                icon: const Icon(Icons.payment,
+                                    color: Colors.green),
+                                tooltip: 'Checkout',
+                                onPressed: () {
+                                  // Navigate to checkout page; expecting the app to implement /checkout route or CheckoutPage
+                                  Navigator.pushNamed(context, '/checkout',
+                                      arguments: product);
+                                },
+                              ),
+                              IconButton(
+                                icon:
+                                    const Icon(Icons.delete, color: Colors.red),
+                                onPressed: () => onRemove(index),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     );
